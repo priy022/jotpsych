@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JotPsych — Staying in Touch</title>
+<style>
+  :root {
+    --paper: #f7f4ee;
+    --panel: #fffdf9;
+    --ink: #23201a;
+    --ink-soft: #6b6558;
+    --ink-faint: #a39c8c;
+    --line: #e6e0d3;
+    --accent: #a8552c;
+    --accent-bg: #f3e3d8;
+    --calm: #3f6e5e;
+    --calm-bg: #e4ede8;
+    --serif: Georgia, 'Iowan Old Style', 'Palatino Linotype', serif;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --mono: 'SF Mono', 'Courier New', monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.5;
+    padding: 2.5rem 1.5rem 5rem;
+  }
+  .wrap { max-width: 920px; margin: 0 auto; }
+
+  .toprow {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  h1 {
+    font-family: var(--serif);
+    font-size: 1.6rem;
+    font-weight: 400;
+    margin: 0 0 0.15rem;
+    color: var(--ink);
+  }
+  .subtitle { color: var(--ink-soft); font-size: 0.9rem; margin: 0; }
+
+  .cycle-controls { display: flex; gap: 0.5rem; align-items: center; }
+  .cycle-controls .caption { font-size: 0.75rem; color: var(--ink-faint); margin-right: 0.4rem; }
+  button.cyclebtn {
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--ink-soft);
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    font-family: var(--sans);
+    transition: all 0.15s ease;
+  }
+  button.cyclebtn.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  button.cyclebtn:hover:not(.active) { border-color: var(--ink-faint); }
+
+  .sim-note {
+    font-size: 0.78rem;
+    color: var(--ink-faint);
+    margin: 0.6rem 0 0;
+    font-style: italic;
+  }
+
+  .headline {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--line);
+  }
+  .headline .big {
+    font-family: var(--serif);
+    font-size: 2.1rem;
+    font-weight: 400;
+    margin: 0 0 0.3rem;
+    color: var(--ink);
+  }
+  .headline .big em { font-style: normal; color: var(--accent); }
+  .headline .sub { color: var(--ink-soft); font-size: 0.94rem; margin: 0; max-width: 60ch; }
+
+  .section-label {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-faint);
+    font-weight: 600;
+    margin: 0 0 0.9rem;
+  }
+
+  .priority-list { margin-bottom: 2.5rem; }
+  .row {
+    display: grid;
+    grid-template-columns: 1.6fr 0.7fr 1fr 1.3fr;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--line);
+    align-items: center;
+  }
+  .row:first-child { padding-top: 0; }
+  .row-head {
+    display: grid;
+    grid-template-columns: 1.6fr 0.7fr 1fr 1.3fr;
+    gap: 1rem;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ink-faint);
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--ink-faint);
+  }
+  @media (max-width: 720px) {
+    .row, .row-head { grid-template-columns: 1fr; gap: 0.3rem; }
+    .row-head { display: none; }
+    .row { padding: 1.1rem 0; }
+  }
+
+  .who .name { font-size: 1rem; margin: 0 0 2px; }
+  .who .contact { font-size: 0.8rem; color: var(--ink-soft); }
+  .who .lock-note { font-size: 0.74rem; color: var(--accent); margin-top: 3px; }
+
+  .dormant-pill {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: var(--calm-bg);
+    color: var(--calm);
+  }
+  .dormant-pill.urgent { background: var(--accent-bg); color: var(--accent); font-weight: 700; }
+
+  .momentum-note { font-size: 0.86rem; }
+  .momentum-note .trend { font-size: 0.78rem; display: block; margin-top: 2px; }
+  .trend.up { color: var(--calm); }
+  .trend.down { color: var(--accent); }
+  .trend.flat { color: var(--ink-faint); }
+
+  .action-note { font-size: 0.88rem; }
+  .action-note .refcode { display: block; font-family: var(--mono); font-size: 0.74rem; color: var(--ink-faint); margin-top: 3px; }
+
+  .secondary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  @media (max-width: 720px) { .secondary-grid { grid-template-columns: 1fr; } }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 1.3rem 1.4rem;
+  }
+  .panel h2 {
+    font-family: var(--serif);
+    font-size: 1.05rem;
+    font-weight: 400;
+    margin: 0 0 0.9rem;
+  }
+  .item { font-size: 0.87rem; padding: 0.7rem 0; border-top: 1px solid var(--line); line-height: 1.55; }
+  .item:first-of-type { border-top: none; padding-top: 0; }
+  .item b { color: var(--ink); }
+  .empty-note { font-size: 0.85rem; color: var(--ink-faint); font-style: italic; }
+
+  details { margin-top: 2.5rem; }
+  details summary {
+    cursor: pointer;
+    font-size: 0.82rem;
+    color: var(--ink-faint);
+    padding: 0.5rem 0;
+  }
+  .footnote-box {
+    margin-top: 0.6rem;
+    padding: 1rem 1.2rem;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    font-size: 0.83rem;
+    color: var(--ink-soft);
+    line-height: 1.65;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="toprow">
+    <div>
+      <h1>Staying in Touch</h1>
+      <p class="subtitle">JotPsych · clinicians who paused, and who's ready for a nudge</p>
+    </div>
+    <div class="cycle-controls">
+      <span class="caption">View:</span>
+      <button class="cyclebtn" data-cycle="1" onclick="loadCycle(1)">Month 1</button>
+      <button class="cyclebtn" data-cycle="2" onclick="loadCycle(2)">Month 2</button>
+      <button class="cyclebtn" data-cycle="3" onclick="loadCycle(3)">Month 3</button>
+    </div>
+  </div>
+  <p class="sim-note" style="margin-top:-1.3rem; margin-bottom:2rem; text-align:right;">These three views simulate new data arriving each month — in production, this updates on its own.</p>
+
+  <div class="headline" id="headline"></div>
+
+  <div class="priority-list">
+    <p class="section-label">Who to reach out to</p>
+    <div class="row-head">
+      <div>Clinician</div><div>Days quiet</div><div>How it's going</div><div>What to send</div>
+    </div>
+    <div id="rows"></div>
+  </div>
+
+  <div class="secondary-grid">
+    <div class="panel">
+      <h2>What's landing well</h2>
+      <div id="successBox"></div>
+    </div>
+    <div class="panel">
+      <h2>Held back this cycle</h2>
+      <div id="heldBox"></div>
+    </div>
+  </div>
+
+  <details>
+    <summary>What's real vs. simulated in this prototype</summary>
+    <div class="footnote-box">
+      <b>Actually running:</b> sorting by how long someone's been quiet, scoring replies to tell warm from cold, choosing what to send next based on what's worked before, and the check that stops a sales-flavored message from reaching someone who told us they're locked into a contract.<br><br>
+      <b>Simulated, clearly marked:</b> new data arriving (the month buttons stand in for a file landing automatically); actually sending the message (logged here, not transmitted); and logging a reply (in production, a simple form does this — what you're seeing is what that form would produce). The reference code next to each entry is real — it's how a reply gets traced back to the exact message that prompted it.
+    </div>
+  </details>
+</div>
+
+<script>
+const OUTREACH_TYPES = ['insight', 'product_update', 'seasonal', 'checkin'];
+const TYPE_LABELS = {
+  insight: 'A relevant insight',
+  product_update: "What's new at JotPsych",
+  seasonal: 'A seasonal note',
+  checkin: 'A quick check-in'
+};
+
+function mkClinician(o) {
+  return Object.assign({
+    replyLog: [], lastOutreachType: null, contractLockedUntil: null, reason: null,
+  }, o);
+}
+
+const CYCLE_1_BASE = [
+  mkClinician({ id:'C1001', name:'Dr. Priya Nathan', email:'p.nathan@example.com', mobile:'(312) 555-0142', group:'solo_therapist', reason:'timing', lastContactDaysAgo: 74 }),
+  mkClinician({ id:'C1002', name:'Dr. Marcus Fell', email:'m.fell@example.com', mobile:'(646) 555-0198', group:'psychiatrist', reason:'not_ready', lastContactDaysAgo: 41 }),
+  mkClinician({ id:'C1003', name:'Dr. Angela Reyes', email:'a.reyes@example.com', mobile:'(215) 555-0110', group:'group_practice', reason:'contract_locked', contractLockedUntil:'2027-03-01', lastContactDaysAgo: 88 }),
+  mkClinician({ id:'C1004', name:'Dr. Samuel Okoye', email:'s.okoye@example.com', mobile:'(773) 555-0177', group:'pmhnp', reason:'timing', lastContactDaysAgo: 22 }),
+  mkClinician({ id:'C1005', name:'Dr. Lena Cho', email:'l.cho@example.com', mobile:'(917) 555-0163', group:'solo_therapist', reason:null, lastContactDaysAgo: 65 }),
+  mkClinician({ id:'C1006', name:'Dr. Federico Diaz', email:'f.diaz@example.com', mobile:'(305) 555-0129', group:'group_practice', reason:'not_ready', lastContactDaysAgo: 12 }),
+  mkClinician({ id:'C1007', name:'Dr. Whitney Park', email:'w.park@example.com', mobile:'(404) 555-0155', group:'psychiatrist', reason:'timing', lastContactDaysAgo: 95 }),
+  mkClinician({ id:'C1008', name:'Dr. Idris Bello', email:'i.bello@example.com', mobile:'(602) 555-0184', group:'pmhnp', reason:null, lastContactDaysAgo: 53 }),
+  mkClinician({ id:'C1009', name:'Dr. Renata Silva', email:'r.silva@example.com', mobile:'(512) 555-0171', group:'solo_therapist', reason:'not_ready', lastContactDaysAgo: 29 }),
+  mkClinician({ id:'C1010', name:'Dr. Owen Kavanagh', email:'o.kavanagh@example.com', mobile:'(206) 555-0146', group:'group_practice', reason:'timing', lastContactDaysAgo: 60 }),
+];
+
+const CYCLE_2_ADDITIONS = [
+  mkClinician({ id:'C1011', name:'Dr. Farah Haddad', email:'f.haddad@example.com', mobile:'(720) 555-0132', group:'psychiatrist', reason:'timing', lastContactDaysAgo: 8 }),
+  mkClinician({ id:'C1012', name:'Dr. Miles Anders', email:'m.anders@example.com', mobile:'(414) 555-0187', group:'pmhnp', reason:null, lastContactDaysAgo: 15 }),
+  mkClinician({ id:'C1013', name:'Dr. Josephine Kray', email:'j.kray@example.com', mobile:'(901) 555-0119', group:'solo_therapist', reason:'not_ready', lastContactDaysAgo: 5 }),
+];
+
+const CYCLE_3_ADDITIONS = [
+  mkClinician({ id:'C1014', name:'Dr. Teodor Vance', email:'t.vance@example.com', mobile:'(360) 555-0193', group:'group_practice', reason:'timing', lastContactDaysAgo: 3 }),
+  mkClinician({ id:'C1015', name:'Dr. Grace Munene', email:'g.munene@example.com', mobile:'(682) 555-0158', group:'psychiatrist', reason:null, lastContactDaysAgo: 10 }),
+  mkClinician({ id:'C1016', name:'Dr. Aaron Fisk', email:'a.fisk@example.com', mobile:'(559) 555-0124', group:'pmhnp', reason:'timing', lastContactDaysAgo: 6 }),
+];
+
+function replyEvent(cycle, refCode, score, type) { return { cycle, refCode, score, type }; }
+
+const REPLY_EVENTS_BY_CLINICIAN = {
+  'C1005': [ replyEvent(1, 'JP-2231', -2, 'insight'), replyEvent(2, 'JP-2298', 5, 'product_update') ],
+  'C1008': [ replyEvent(1, 'JP-2240', 3, 'insight'), replyEvent(2, 'JP-2301', 2, 'product_update'), replyEvent(3, 'JP-2355', -3, 'checkin') ],
+  'C1010': [ replyEvent(1, 'JP-2252', 6, 'insight'), replyEvent(2, 'JP-2310', 4, 'insight') ],
+  'C1011': [ replyEvent(2, 'JP-2318', 7, 'product_update') ],
+};
+
+function cumulativeScoreThroughCycle(clinicianId, cycle) {
+  const events = (REPLY_EVENTS_BY_CLINICIAN[clinicianId] || []).filter(e => e.cycle <= cycle);
+  let running = 0;
+  const trace = [];
+  events.forEach(e => {
+    const before = running;
+    running += e.score;
+    trace.push({ before, after: running, cycle: e.cycle, refCode: e.refCode, type: e.type });
+  });
+  return { score: running, trace };
+}
+
+function detectSignFlip(trace) {
+  if (trace.length < 1) return null;
+  const last = trace[trace.length - 1];
+  if (last.before <= 0 && last.after > 0) return 'up';
+  if (last.before > 0 && last.after <= 0) return 'down';
+  return null;
+}
+
+function typePerformanceBySegment(clinicians, cycle) {
+  const perf = {};
+  const contributors = {};
+  clinicians.forEach(c => {
+    const events = (REPLY_EVENTS_BY_CLINICIAN[c.id] || []).filter(e => e.cycle <= cycle);
+    events.forEach(e => {
+      perf[c.group] = perf[c.group] || {};
+      perf[c.group][e.type] = (perf[c.group][e.type] || 0) + e.score;
+      contributors[c.group] = contributors[c.group] || {};
+      contributors[c.group][e.type] = contributors[c.group][e.type] || new Set();
+      contributors[c.group][e.type].add(c.id);
+    });
+  });
+  return { perf, contributors };
+}
+
+function pickNextOutreachType(clinician, perfData, cycle) {
+  const idNum = parseInt(clinician.id.slice(1));
+  const segPerf = perfData.perf[clinician.group] || {};
+  const segContrib = perfData.contributors[clinician.group] || {};
+
+  let idx = (cycle + idNum) % OUTREACH_TYPES.length;
+  let basePick = OUTREACH_TYPES[idx];
+  if (basePick === clinician.lastOutreachType) {
+    idx = (idx + 1) % OUTREACH_TYPES.length;
+    basePick = OUTREACH_TYPES[idx];
+  }
+
+  const baseScore = segPerf[basePick] || 0;
+  let best = basePick;
+  let bestScore = baseScore;
+  OUTREACH_TYPES.forEach(t => {
+    if (t === clinician.lastOutreachType) return;
+    const s = segPerf[t] || 0;
+    const distinctContributors = (segContrib[t] || new Set()).size;
+    if (s > bestScore + 3 && distinctContributors >= 2) { best = t; bestScore = s; }
+  });
+  return best;
+}
+
+function isContractGateActive(clinician, todaySimISO) {
+  if (clinician.reason !== 'contract_locked' || !clinician.contractLockedUntil) return false;
+  const today = new Date(todaySimISO);
+  const lockDate = new Date(clinician.contractLockedUntil);
+  const daysToLock = (lockDate - today) / (1000 * 60 * 60 * 24);
+  return daysToLock > 45;
+}
+
+function qcGate(clinician, proposedType, todaySimISO) {
+  if (isContractGateActive(clinician, todaySimISO) && (proposedType === 'checkin' || proposedType === 'product_update')) {
+    return {
+      passed: false,
+      reason: `Locked into a contract until ${clinician.contractLockedUntil} — holding off on anything that sounds like a pitch until that's closer to ending.`,
+      substitute: 'insight'
+    };
+  }
+  return { passed: true };
+}
+
+function genRefCode(clinicianId, cycle) {
+  return 'JP-' + (parseInt(clinicianId.slice(1)) + cycle * 37).toString().slice(-4);
+}
+
+const TODAY_BY_CYCLE = { 1: '2026-07-01', 2: '2026-08-01', 3: '2026-09-01' };
+
+function buildCycleData(cycle) {
+  let clinicians = CYCLE_1_BASE.map(c => Object.assign({}, c));
+  if (cycle >= 2) clinicians = clinicians.concat(CYCLE_2_ADDITIONS.map(c => Object.assign({}, c)));
+  if (cycle >= 3) clinicians = clinicians.concat(CYCLE_3_ADDITIONS.map(c => Object.assign({}, c)));
+
+  const daysPerCycle = 31;
+  const perfData = typePerformanceBySegment(clinicians, cycle);
+  const today = TODAY_BY_CYCLE[cycle];
+
+  const heldEvents = [];
+  const rows = clinicians.map(c => {
+    const { score, trace } = cumulativeScoreThroughCycle(c.id, cycle);
+    const flip = detectSignFlip(trace);
+    const hasReplied = trace.length > 0;
+
+    let daysDormant;
+    if (hasReplied) {
+      const lastReplyCycle = trace[trace.length - 1].cycle;
+      daysDormant = (cycle - lastReplyCycle) * daysPerCycle + 3;
+    } else {
+      daysDormant = c.lastContactDaysAgo + Math.max(0, cycle - 1) * daysPerCycle;
+    }
+
+    let proposedType = pickNextOutreachType(c, perfData, cycle);
+    const gate = qcGate(c, proposedType, today);
+    let finalType = proposedType;
+    if (!gate.passed) {
+      finalType = gate.substitute;
+      heldEvents.push({ name: c.name, attempted: TYPE_LABELS[proposedType], reason: gate.reason, substitute: TYPE_LABELS[gate.substitute] });
+    }
+
+    return { clinician: c, daysDormant, score, flip, finalType, refCode: genRefCode(c.id, cycle), hasReplied };
+  });
+
+  rows.sort((a, b) => {
+    const aUrgent = a.daysDormant > 60 ? 1 : 0;
+    const bUrgent = b.daysDormant > 60 ? 1 : 0;
+    if (aUrgent !== bUrgent) return bUrgent - aUrgent;
+    return b.daysDormant - a.daysDormant;
+  });
+
+  return { rows, heldEvents, perf: perfData.perf, totalClinicians: clinicians.length };
+}
+
+function howItsGoing(row) {
+  if (row.flip === 'up') return { text: 'Just responded well', cls: 'up', arrow: '↑' };
+  if (row.flip === 'down') return { text: 'Cooled off — worth a check-in', cls: 'down', arrow: '↓' };
+  if (row.hasReplied && row.score > 0) return { text: 'Warming up, steady', cls: 'up', arrow: '' };
+  if (row.hasReplied && row.score <= 0) return { text: 'Lukewarm so far', cls: 'flat', arrow: '' };
+  if (row.daysDormant > 60) return { text: 'No word in a while', cls: 'down', arrow: '' };
+  return { text: 'On the usual rhythm', cls: 'flat', arrow: '' };
+}
+
+function loadCycle(cycle) {
+  document.querySelectorAll('.cyclebtn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.cyclebtn[data-cycle="${cycle}"]`).classList.add('active');
+
+  const data = buildCycleData(cycle);
+  const urgentCount = data.rows.filter(r => r.daysDormant > 60).length;
+  const warmedCount = data.rows.filter(r => r.flip === 'up').length;
+
+  document.getElementById('headline').innerHTML = `
+    <p class="big"><em>${urgentCount}</em> people haven't heard from us in over two months</p>
+    <p class="sub">${warmedCount ? warmedCount + ' just responded well and are worth following up on quickly. ' : ''}${data.heldEvents.length ? data.heldEvents.length + ' message' + (data.heldEvents.length>1?'s were':' was') + ' held back this month — see below.' : 'Nothing was held back this month.'}</p>
+  `;
+
+  const rowsEl = document.getElementById('rows');
+  rowsEl.innerHTML = data.rows.map(r => {
+    const status = howItsGoing(r);
+    const lockNote = r.clinician.reason === 'contract_locked' ? `<div class="lock-note">Locked into a contract until ${r.clinician.contractLockedUntil}</div>` : '';
+    return `
+      <div class="row">
+        <div class="who">
+          <div class="name">${r.clinician.name}</div>
+          <div class="contact">${r.clinician.email} · ${r.clinician.mobile}</div>
+          ${lockNote}
+        </div>
+        <div><span class="dormant-pill ${r.daysDormant > 60 ? 'urgent' : ''}">${r.daysDormant} days</span></div>
+        <div class="momentum-note">${status.text}<span class="trend ${status.cls}">${status.arrow ? status.arrow + ' ' : ''}${r.score >= 0 ? '+' : ''}${r.score} from replies</span></div>
+        <div class="action-note">${TYPE_LABELS[r.finalType]}<span class="refcode">Ref ${r.refCode}</span></div>
+      </div>
+    `;
+  }).join('');
+
+  const successBox = document.getElementById('successBox');
+  let successHtml = '';
+  data.rows.filter(r => r.flip === 'up').forEach(r => {
+    successHtml += `<div class="item"><b>${r.clinician.name}</b> replied well to our last note — good moment to follow up while it's fresh.</div>`;
+  });
+  const bestType = Object.entries(data.perf).map(([seg, types]) => {
+    const best = Object.entries(types).sort((a,b) => b[1]-a[1])[0];
+    return best ? { seg, type: best[0], score: best[1] } : null;
+  }).filter(Boolean).sort((a,b)=>b.score-a.score)[0];
+  if (bestType) {
+    successHtml += `<div class="item">"${TYPE_LABELS[bestType.type]}" is getting the best response so far among <b>${bestType.seg.replace('_',' ')}</b> clinicians.</div>`;
+  }
+  successBox.innerHTML = successHtml || '<p class="empty-note">No replies yet to learn from this cycle.</p>';
+
+  const heldBox = document.getElementById('heldBox');
+  heldBox.innerHTML = data.heldEvents.length
+    ? data.heldEvents.map(e => `<div class="item"><b>${e.name}</b> — we almost sent "${e.attempted}," but ${e.reason.charAt(0).toLowerCase()}${e.reason.slice(1)} Sent "${e.substitute}" instead.</div>`).join('')
+    : '<p class="empty-note">Nothing held back this cycle.</p>';
+}
+
+loadCycle(1);
+</script>
+</body>
+</html>
