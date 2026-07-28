@@ -196,6 +196,18 @@
     letter-spacing: 0.02em;
   }
   .empty-note { font-size: 0.85rem; color: var(--ink-faint); font-style: italic; padding: 0.9rem 0; }
+  .check-tag {
+    display: inline-block;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    padding: 2px 7px;
+    border-radius: 4px;
+    margin-bottom: 3px;
+  }
+  .check-tag.timing-tag { background: var(--accent-bg); color: var(--accent); }
+  .check-tag.tone-tag { background: var(--warn-bg); color: var(--warn); }
 
   .secondary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
   @media (max-width: 780px) { .secondary-grid { grid-template-columns: 1fr; } }
@@ -419,6 +431,31 @@ function isContractGateActive(clinician, todaySimISO) {
   return daysToLock > 45;
 }
 
+// Simulated draft text for one demo clinician -- stands in for the not-yet-built
+// content-generation step (see "Known Gap: Message Content Itself"). The check
+// below is real and runs against this simulated input, same honesty pattern
+// used for every other sketched part of this prototype.
+const SIMULATED_DRAFTS = {
+  'C1015': { cycle: 3, text: "Hi Dr. Munene, just wanted to touch base and circle back on your JotPsych account this month." },
+};
+
+const GENERIC_PHRASE_PATTERNS = [
+  { pattern: /touch base/i, label: '"touch base"' },
+  { pattern: /circle back/i, label: '"circle back"' },
+  { pattern: /just wanted to check in and see/i, label: '"just wanted to check in and see"' },
+  { pattern: /following up on this thread/i, label: '"following up on this thread"' },
+  { pattern: /reaching out because/i, label: '"reaching out because"' },
+];
+
+function toneCheck(draftText) {
+  for (const { pattern, label } of GENERIC_PHRASE_PATTERNS) {
+    if (pattern.test(draftText)) {
+      return { passed: false, flaggedPhrase: label };
+    }
+  }
+  return { passed: true };
+}
+
 function qcGate(clinician, proposedType, todaySimISO) {
   if (isContractGateActive(clinician, todaySimISO) && (proposedType === 'checkin' || proposedType === 'product_update')) {
     const lockEnd = effectiveLockEndDate(clinician);
@@ -467,7 +504,24 @@ function buildCycleData(cycle) {
     let finalType = proposedType;
     if (!gate.passed) {
       finalType = gate.substitute;
-      heldEvents.push({ name: c.name, attempted: TYPE_LABELS[proposedType], reason: gate.reason, substitute: TYPE_LABELS[gate.substitute] });
+      heldEvents.push({ kind: 'contract-timing', name: c.name, attempted: TYPE_LABELS[proposedType], reason: gate.reason, substitute: TYPE_LABELS[gate.substitute] });
+    }
+
+    // Independent check: tone/generic-phrase, runs against a simulated draft
+    // where one exists. Separate mechanism from the contract-timing gate above --
+    // this one judges wording, not scheduling.
+    const draft = SIMULATED_DRAFTS[c.id];
+    if (draft && draft.cycle === cycle) {
+      const tone = toneCheck(draft.text);
+      if (!tone.passed) {
+        heldEvents.push({
+          kind: 'tone',
+          name: c.name,
+          attempted: TYPE_LABELS[finalType],
+          reason: `drafted wording used ${tone.flaggedPhrase} — reads as generic, not like a message from someone who knows this clinician's practice.`,
+          substitute: 'a plainer, specific rewrite (simulated — the actual rewrite step isn\'t built yet)',
+        });
+      }
     }
 
     const isNewThisCycle = c.joinedCycle === cycle;
@@ -589,10 +643,24 @@ function render() {
   `;
 
   const repliedThisCycleCount = filtered.filter(r => r.repliedThisCycle).length;
+
+  // Cumulative reactivation count across all cycles seen so far (dedup by
+  // clinician), for the "what it earned" estimate. Filtered by segment to
+  // match what's currently displayed. The dollar figure is a stated
+  // assumption, never presented as a measured fact.
+  const ASSUMED_VALUE_PER_REACTIVATION = 1200;
+  const reactivatedIds = new Set();
+  for (let c = 1; c <= currentCycle; c++) {
+    buildCycleData(c).rows.filter(matchesSegment).filter(r => r.flip === 'up').forEach(r => reactivatedIds.add(r.clinician.id));
+  }
+  const reactivatedCount = reactivatedIds.size;
+  const estimatedValue = reactivatedCount * ASSUMED_VALUE_PER_REACTIVATION;
+
   document.getElementById('statStrip').innerHTML = `
     <div class="stat-block"><div class="num">${filtered.length}</div><div class="label">On file</div></div>
     <div class="stat-block"><div class="num">${repliedThisCycleCount}</div><div class="label">Replied this month</div></div>
     <div class="stat-block"><div class="num">${data.heldEvents.length}</div><div class="label">Held back</div></div>
+    <div class="stat-block"><div class="num">$${estimatedValue.toLocaleString()}</div><div class="label">Est. value (assumption, not measured)</div></div>
   `;
 
   document.getElementById('urgentCount').textContent = urgent.length + ' clinician' + (urgent.length===1?'':'s');
@@ -640,7 +708,15 @@ function render() {
 
   const heldBox = document.getElementById('heldBox');
   heldBox.innerHTML = data.heldEvents.length
-    ? data.heldEvents.map(e => `<div class="item"><b>${e.name}</b> — almost got "${e.attempted}," but they're ${e.reason} Sent "${e.substitute}" instead.</div>`).join('')
+    ? data.heldEvents.map(e => {
+        const tag = e.kind === 'tone'
+          ? '<span class="check-tag tone-tag">Tone check</span>'
+          : '<span class="check-tag timing-tag">Contract timing</span>';
+        const sentence = e.kind === 'tone'
+          ? `<b>${e.name}</b> — draft for "${e.attempted}" was held: ${e.reason} Sent ${e.substitute}.`
+          : `<b>${e.name}</b> — almost got "${e.attempted}," but they're ${e.reason} Sent "${e.substitute}" instead.`;
+        return `<div class="item">${tag}<br>${sentence}</div>`;
+      }).join('')
     : '<p class="empty-note">Nothing held back this cycle.</p>';
 }
 
