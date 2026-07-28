@@ -43,7 +43,7 @@
     flex-wrap: wrap;
     gap: 1rem;
   }
-  h1 { font-family: var(--serif); font-size: 1.6rem; font-weight: 400; margin: 0 0 0.15rem; }
+  h1 { font-family: var(--sans); font-size: 1.5rem; font-weight: 700; letter-spacing: -0.015em; margin: 0 0 0.15rem; }
   .subtitle { color: var(--ink-soft); font-size: 0.9rem; margin: 0; }
 
   .cycle-controls { display: flex; gap: 0.5rem; align-items: center; }
@@ -74,6 +74,35 @@
 
   .sim-note { font-size: 0.78rem; color: var(--ink-faint); font-style: italic; }
 
+  .scenario-header {
+    background: var(--brand-bg);
+    border-radius: 10px;
+    padding: 0.8rem 1.1rem;
+    margin-bottom: 1.1rem;
+    font-size: 0.86rem;
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+  .scenario-header .eyebrow {
+    display: block;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--brand);
+    font-weight: 700;
+    margin-bottom: 3px;
+  }
+  .scenario-header .rejection-flag {
+    display: inline-block;
+    margin-top: 5px;
+    font-size: 0.79rem;
+    font-weight: 700;
+    color: var(--accent);
+    background: var(--accent-bg);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
   .reassess-banner {
     display: none;
     background: var(--panel);
@@ -98,7 +127,7 @@
   }
 
   .headline { margin-bottom: 1.8rem; padding-bottom: 1.4rem; border-bottom: 1px solid var(--line); }
-  .headline .big { font-family: var(--serif); font-size: 2.1rem; font-weight: 400; letter-spacing: -0.01em; margin: 0 0 0.3rem; font-variant-numeric: tabular-nums; }
+  .headline .big { font-family: var(--sans); font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; margin: 0 0 0.3rem; font-variant-numeric: tabular-nums; }
   .headline .big em { font-style: normal; font-weight: 700; color: var(--accent); }
   .headline .sub { color: var(--ink-soft); font-size: 0.94rem; margin: 0; max-width: 68ch; }
 
@@ -110,7 +139,7 @@
     border-bottom: 1px solid var(--line);
     flex-wrap: wrap;
   }
-  .stat-block .num { font-family: var(--serif); font-size: 1.35rem; font-weight: 700; color: var(--brand); font-variant-numeric: tabular-nums; }
+  .stat-block .num { font-family: var(--sans); font-size: 1.3rem; font-weight: 800; color: var(--brand); font-variant-numeric: tabular-nums; }
   .stat-block .label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-faint); margin-top: 1px; }
 
   .section-label {
@@ -123,30 +152,38 @@
   @media (max-width: 780px) { .stale-columns { grid-template-columns: 1fr; } }
 
   .stale-col-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.6rem; }
-  .stale-col-head h3 { font-family: var(--serif); font-size: 1.05rem; font-weight: 400; margin: 0; }
+  .stale-col-head h3 { font-family: var(--sans); font-size: 1rem; font-weight: 700; margin: 0; }
   .stale-col-head .count { font-family: var(--mono); font-size: 0.82rem; color: var(--ink-faint); }
 
-  .card-list { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 0.3rem 1.1rem; }
+  .card-list { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 0.3rem 1.25rem; }
   .card-list.urgent-list { background: #fbf5f4; border-color: #ecdcd9; }
   .row {
     padding: 0.9rem 0;
     border-bottom: 1px solid var(--line);
   }
   .row:last-child { border-bottom: none; }
-  .row .name { font-size: 0.96rem; margin: 0 0 2px; }
+  .row .name { font-size: 0.95rem; font-weight: 600; margin: 0 0 2px; }
   .row .contact { font-size: 0.78rem; color: var(--ink-soft); }
   .row .lock-note { font-size: 0.73rem; color: var(--accent); margin-top: 2px; }
-  .row .meta-line {
-    display: flex; justify-content: space-between; align-items: center;
-    margin-top: 0.4rem; font-size: 0.83rem;
+  .row-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr;
+    gap: 0.75rem;
+    margin-top: 0.55rem;
   }
-  .row .status { color: var(--ink-soft); }
-  .row .status .trend { font-weight: 600; }
-  .row .status .cadence-note { font-weight: 400; color: var(--ink-faint); }
+  @media (max-width: 640px) {
+    .row-grid { grid-template-columns: 1fr; gap: 0.35rem; }
+  }
+  .row-grid .col-label {
+    font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em;
+    color: var(--ink-faint); margin-bottom: 2px;
+  }
+  .row .status-line { font-size: 0.85rem; font-weight: 600; }
+  .row .cadence-line { font-size: 0.76rem; color: var(--ink-faint); margin-top: 1px; }
   .trend.up { color: var(--calm); }
   .trend.down { color: var(--accent); }
   .trend.flat { color: var(--ink-faint); }
-  .row .action { text-align: right; font-size: 0.83rem; }
+  .row .type-line { font-size: 0.85rem; }
   .row .refcode {
     display: inline-block;
     font-family: var(--mono);
@@ -163,8 +200,8 @@
   .secondary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
   @media (max-width: 780px) { .secondary-grid { grid-template-columns: 1fr; } }
 
-  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 1.3rem 1.4rem; }
-  .panel h2 { font-family: var(--serif); font-size: 1.05rem; font-weight: 400; margin: 0 0 0.5rem; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 1.25rem; }
+  .panel h2 { font-family: var(--sans); font-size: 1rem; font-weight: 700; margin: 0 0 0.5rem; }
   .panel .how-note { font-size: 0.82rem; color: var(--ink-soft); margin: 0 0 0.9rem; line-height: 1.5; }
   .item { font-size: 0.87rem; padding: 0.65rem 0; border-top: 1px solid var(--line); line-height: 1.55; }
   .item:first-of-type { border-top: none; padding-top: 0; }
@@ -203,6 +240,8 @@
     </div>
     <span class="sim-note">Month buttons simulate a new file landing — production updates this on its own.</span>
   </div>
+
+  <div class="scenario-header" id="scenarioHeader"></div>
 
   <div class="reassess-banner" id="reassessBanner"></div>
 
@@ -471,17 +510,27 @@ function renderRowCard(r) {
     const isFallback = !r.clinician.contractLockedUntil;
     lockNote = `<div class="lock-note">Locked into a contract${isFallback ? ', estimated' : ''} until ${lockEnd}</div>`;
   }
-  const cadenceNote = r.isNewThisCycle
-    ? '<span class="cadence-note">First outreach this cycle</span>'
-    : '<span class="cadence-note">Last reached out about a month ago</span>';
+  const cadenceText = r.isNewThisCycle ? 'First outreach this cycle' : 'Last reached out about a month ago';
   return `
     <div class="row">
       <div class="name">${r.clinician.name}</div>
       <div class="contact">${r.clinician.email} · ${r.clinician.mobile}</div>
       ${lockNote}
-      <div class="meta-line">
-        <span class="status"><span class="trend ${status.cls}">${status.arrow}${status.text}</span> · ${cadenceNote}</span>
-        <span class="action">${TYPE_LABELS[r.finalType]}<span class="refcode">Ref ${r.refCode} · ${r.daysDormant}d quiet</span></span>
+      <div class="row-grid">
+        <div>
+          <div class="col-label">Status</div>
+          <div class="status-line"><span class="trend ${status.cls}">${status.arrow}${status.text}</span></div>
+          <div class="cadence-line">${r.daysDormant} days quiet</div>
+        </div>
+        <div>
+          <div class="col-label">History</div>
+          <div class="cadence-line">${cadenceText}</div>
+        </div>
+        <div>
+          <div class="col-label">Next send</div>
+          <div class="type-line">${TYPE_LABELS[r.finalType]}</div>
+          <div class="refcode">Ref ${r.refCode}</div>
+        </div>
       </div>
     </div>
   `;
@@ -517,6 +566,22 @@ function render() {
   const urgent = filtered.filter(r => r.daysDormant > 60).sort((a,b)=>b.daysDormant-a.daysDormant);
   const steady = filtered.filter(r => r.daysDormant <= 60).sort((a,b)=>b.daysDormant-a.daysDormant);
   const warmedCount = filtered.filter(r => r.flip === 'up').length;
+
+  const newThisCycleCount = filtered.filter(r => r.isNewThisCycle).length;
+  const repliedThisCycleForHeader = filtered.filter(r => r.repliedThisCycle).length;
+  const scenarioLabels = {
+    1: 'Initial upload — the starting list, ranked for the first time.',
+    2: 'One month later — new names added, first replies logged.',
+    3: 'Two months in — the list has grown again and reply patterns are becoming visible.',
+  };
+  const rejectionFlag = data.heldEvents.length
+    ? `<span class="rejection-flag">${data.heldEvents.length} message${data.heldEvents.length > 1 ? 's' : ''} rejected by the quality check this month — see "Held back" below</span>`
+    : '';
+  document.getElementById('scenarioHeader').innerHTML = `
+    <span class="eyebrow">Month ${currentCycle} of 3 — simulated</span>
+    ${scenarioLabels[currentCycle]} ${newThisCycleCount} new clinician${newThisCycleCount === 1 ? '' : 's'} added, ${repliedThisCycleForHeader} repl${repliedThisCycleForHeader === 1 ? 'y' : 'ies'} logged this month.
+    <br>${rejectionFlag}
+  `;
 
   document.getElementById('headline').innerHTML = `
     <p class="big"><em>${urgent.length}</em> haven't heard from us in over two months</p>
