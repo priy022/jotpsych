@@ -6,18 +6,20 @@
 <title>JotPsych — Staying in Touch</title>
 <style>
   :root {
-    --paper: #f7f4ee;
-    --panel: #fffdf9;
-    --ink: #23201a;
-    --ink-soft: #6b6558;
-    --ink-faint: #a39c8c;
-    --line: #e6e0d3;
-    --accent: #a8552c;
-    --accent-bg: #f3e3d8;
-    --calm: #3f6e5e;
-    --calm-bg: #e4ede8;
-    --warn: #8a6d1f;
-    --warn-bg: #f5edd6;
+    --paper: #f4f6f8;
+    --panel: #ffffff;
+    --ink: #16233a;
+    --ink-soft: #52627a;
+    --ink-faint: #94a1b3;
+    --line: #e0e5eb;
+    --accent: #a3352c;
+    --accent-bg: #f4e3e0;
+    --calm: #1d4e6e;
+    --calm-bg: #e3ecf2;
+    --brand: #17456b;
+    --brand-bg: #e7eef4;
+    --warn: #6b4d10;
+    --warn-bg: #f2ecd9;
     --serif: Georgia, 'Iowan Old Style', 'Palatino Linotype', serif;
     --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     --mono: 'SF Mono', 'Courier New', monospace;
@@ -56,7 +58,7 @@
     cursor: pointer;
     font-family: var(--sans);
   }
-  button.pill.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  button.pill.active { background: var(--brand); color: #fff; border-color: var(--brand); }
   button.pill:hover:not(.active) { border-color: var(--ink-faint); }
 
   .filter-row {
@@ -74,22 +76,42 @@
 
   .reassess-banner {
     display: none;
-    background: var(--warn-bg);
-    border: 1px solid #e3d5a3;
-    border-radius: 12px;
-    padding: 1rem 1.2rem;
+    background: var(--panel);
+    border-left: 3px solid var(--warn);
+    border-radius: 4px;
+    padding: 0.9rem 1.2rem;
     margin-bottom: 1.6rem;
-    font-size: 0.9rem;
-    color: #5f4c14;
+    font-size: 0.88rem;
+    color: var(--ink-soft);
     line-height: 1.55;
   }
   .reassess-banner.show { display: block; }
-  .reassess-banner b { color: #4a3b0f; }
+  .reassess-banner b { color: var(--ink); font-weight: 700; }
+  .reassess-banner .eyebrow {
+    display: block;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--warn);
+    font-weight: 600;
+    margin-bottom: 3px;
+  }
 
   .headline { margin-bottom: 1.8rem; padding-bottom: 1.4rem; border-bottom: 1px solid var(--line); }
-  .headline .big { font-family: var(--serif); font-size: 2rem; font-weight: 400; margin: 0 0 0.3rem; }
-  .headline .big em { font-style: normal; color: var(--accent); }
+  .headline .big { font-family: var(--serif); font-size: 2.1rem; font-weight: 400; letter-spacing: -0.01em; margin: 0 0 0.3rem; font-variant-numeric: tabular-nums; }
+  .headline .big em { font-style: normal; font-weight: 700; color: var(--accent); }
   .headline .sub { color: var(--ink-soft); font-size: 0.94rem; margin: 0; max-width: 68ch; }
+
+  .stat-strip {
+    display: flex;
+    gap: 2.2rem;
+    margin-bottom: 1.8rem;
+    padding-bottom: 1.4rem;
+    border-bottom: 1px solid var(--line);
+    flex-wrap: wrap;
+  }
+  .stat-block .num { font-family: var(--serif); font-size: 1.35rem; font-weight: 700; color: var(--brand); font-variant-numeric: tabular-nums; }
+  .stat-block .label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-faint); margin-top: 1px; }
 
   .section-label {
     font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em;
@@ -105,6 +127,7 @@
   .stale-col-head .count { font-family: var(--mono); font-size: 0.82rem; color: var(--ink-faint); }
 
   .card-list { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 0.3rem 1.1rem; }
+  .card-list.urgent-list { background: #fbf5f4; border-color: #ecdcd9; }
   .row {
     padding: 0.9rem 0;
     border-bottom: 1px solid var(--line);
@@ -124,7 +147,17 @@
   .trend.down { color: var(--accent); }
   .trend.flat { color: var(--ink-faint); }
   .row .action { text-align: right; font-size: 0.83rem; }
-  .row .refcode { display: block; font-family: var(--mono); font-size: 0.71rem; color: var(--ink-faint); margin-top: 2px; }
+  .row .refcode {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    color: var(--calm);
+    margin-top: 4px;
+    padding: 1px 6px;
+    border: 1px solid var(--calm-bg);
+    border-radius: 3px;
+    letter-spacing: 0.02em;
+  }
   .empty-note { font-size: 0.85rem; color: var(--ink-faint); font-style: italic; padding: 0.9rem 0; }
 
   .secondary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
@@ -174,6 +207,7 @@
   <div class="reassess-banner" id="reassessBanner"></div>
 
   <div class="headline" id="headline"></div>
+  <div class="stat-strip" id="statStrip"></div>
 
   <p class="section-label">Who to reach out to, grouped by how long it's been</p>
   <p class="section-note">"How long it's been" counts days since we last actually heard from them — a reply resets the clock. If they've never replied, it's simply days since they went quiet. Two months (60 days) of silence is the point where we treat it as urgent.</p>
@@ -181,7 +215,7 @@
   <div class="stale-columns">
     <div>
       <div class="stale-col-head"><h3>Needs attention now</h3><span class="count" id="urgentCount"></span></div>
-      <div class="card-list" id="urgentRows"></div>
+      <div class="card-list urgent-list" id="urgentRows"></div>
     </div>
     <div>
       <div class="stale-col-head"><h3>On the radar</h3><span class="count" id="steadyCount"></span></div>
@@ -489,6 +523,13 @@ function render() {
     <p class="sub">${warmedCount ? warmedCount + ' just responded well — worth following up while it is fresh. ' : ''}${data.heldEvents.length ? data.heldEvents.length + ' message' + (data.heldEvents.length>1?'s were':' was') + ' held back this month.' : ''}</p>
   `;
 
+  const repliedThisCycleCount = filtered.filter(r => r.repliedThisCycle).length;
+  document.getElementById('statStrip').innerHTML = `
+    <div class="stat-block"><div class="num">${filtered.length}</div><div class="label">On file</div></div>
+    <div class="stat-block"><div class="num">${repliedThisCycleCount}</div><div class="label">Replied this month</div></div>
+    <div class="stat-block"><div class="num">${data.heldEvents.length}</div><div class="label">Held back</div></div>
+  `;
+
   document.getElementById('urgentCount').textContent = urgent.length + ' clinician' + (urgent.length===1?'':'s');
   document.getElementById('steadyCount').textContent = steady.length + ' clinician' + (steady.length===1?'':'s');
   document.getElementById('urgentRows').innerHTML = urgent.length ? urgent.map(renderRowCard).join('') : '<p class="empty-note">Nobody in this view has gone quiet that long.</p>';
@@ -507,7 +548,7 @@ function render() {
     const latest = ESTABLISHED_REPLY_RATE_HISTORY[cycles[cycles.length-1]];
     if (latest < 0.15 && latest < prior * 0.5) {
       banner.classList.add('show');
-      banner.innerHTML = `<b>Reply rates dropped sharply among clinicians we've had on file a while</b> — down to ${(latest*100).toFixed(0)}% from ${(prior*100).toFixed(0)}% the month before. This is measured only on people who've had real time to respond, so it isn't just the list growing — worth a look at the approach itself, not just which message type gets picked next.`;
+      banner.innerHTML = `<span class="eyebrow">Worth a closer look</span><b>Reply rates dropped sharply among clinicians we've had on file a while</b> — down to ${(latest*100).toFixed(0)}% from ${(prior*100).toFixed(0)}% the month before. This is measured only on people who've had real time to respond, so it isn't just the list growing — worth a look at the approach itself, not just which message type gets picked next.`;
     } else {
       banner.classList.remove('show');
     }
